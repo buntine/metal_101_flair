@@ -1,4 +1,4 @@
 metal_101_flair
 ===============
 
-A simple script to help auto the flair process on /r/Metal101
+A simple app to help auotmate the flair process on /r/Metal101
