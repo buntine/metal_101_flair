@@ -1,5 +1,8 @@
 GEM
   specs:
+    active_support (3.0.0)
+      activesupport (= 3.0.0)
+    activesupport (3.0.0)
     json (1.8.0)
     safe_yaml (0.9.4)
 
@@ -7,5 +10,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  active_support
   json
   safe_yaml
