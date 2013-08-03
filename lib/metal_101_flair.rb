@@ -36,15 +36,15 @@ class Metal101Flair
         thread.cache_comment_count!
 
         comments = get_json(thread.permalink)["children"]
-        comments.each do |c|
-          comment = Comment.new(shit)
+        comments = flatten_comments(comments)
 
-          if comment.should_check? and comment.has_magic_words?
-            puts "Found magic words in #{comment.name}!"
-            # Find out author of parent.
-            # Update professors hash.
+        comments.each do |c|
+          if comments.should_check? and comment.has_magic_words?
+            # Find parent comment in "comments" array.
+            # Add Author to professors hash.
+            puts " ! Found magic words in #{comment.name}"
           else
-            puts "Ignoring comment #{comment.name}"
+            puts " - Ignoring comment #{comment.name}"
           end
         end
       else
@@ -56,6 +56,10 @@ class Metal101Flair
   end
 
  private
+
+  # Recursively consumes the comments from a thread an returns a flattened array.
+  def flatten_comments(comments)
+  end
 
   def get_json(path="/", query={})
     url = File.join(@base_url, "#{path.sub(/\/+$/, ""}.json?#{query.to_query}")

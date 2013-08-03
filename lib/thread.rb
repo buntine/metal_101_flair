@@ -11,7 +11,6 @@ class Thread
 
   def should_check?
     # Check for any comments
-    # 
   end
 
 end
