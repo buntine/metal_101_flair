@@ -25,6 +25,8 @@ class Metal101Flair
   end
 
   def professors
+    professors = {}
+
     threads = get_json("new", {:limit = > @limit})["children"]
     threads.each do |t|
       thread = Thread.new(t["name"], t["author"], t["num_comments"], t["permalink"])
@@ -36,11 +38,21 @@ class Metal101Flair
         comments = get_json(thread.permalink)["children"]
         comments.each do |c|
           comment = Comment.new(shit)
+
+          if comment.should_check? and comment.has_magic_words?
+            puts "Found magic words in #{comment.name}!"
+            # Find out author of parent.
+            # Update professors hash.
+          else
+            puts "Ignoring comment #{comment.name}"
+          end
         end
       else
         puts "Ignoring thread #{thread.name}"  
       end
     end
+
+    # Collate data and print / PM.
   end
 
  private
