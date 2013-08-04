@@ -5,27 +5,13 @@ require "active_support/core_ext/object/to_query"
 require "./lib/r_thread"
 require "./lib/r_comment"
 
-# Get 100 threads, order by new
-# See if new comments exist in each
-  # Delete those that have not changed
-  # Update databse with new threads
-  # Update database with new comments count
-
-# Check comments for each
-  # Delete comments older than 6 hours
-  # Search for magic words
-    # If found, find parent and record
-
-# Collate into comment
-# PM mods
-
 class Metal101Flair
 
   def initialize(limit=100, hours=6)
     @limit = limit
     @hours = hours
     @base_url = "http://www.reddit.com"
-    @moderator = "Toeknee99"
+    @moderator = "MODERATOR_NAME"
   end
 
   def professors
@@ -52,21 +38,17 @@ class Metal101Flair
             else
               puts " - No magic words in #{c.name}"
             end
-          else
-            puts " - Ignoring old comment #{c.name}"
           end
         end
-      else
-        puts "Ignoring thread #{thread.name}"  
       end
 
       thread.cache_comment_count!
     end
 
     reddit = Snoo::Client.new
-    reddit.log_in "USER_HERE", "PASSWORD_HERE"
+    reddit.log_in "USER_NAME", "PASSWORD"
 
-    # Collate data and print / PM.
+    # Collate data and PM mods.
     pm_content = if professors.empty?
       "No professors in the past #{@hours} hours..."
     else
