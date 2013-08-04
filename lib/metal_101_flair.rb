@@ -36,7 +36,6 @@ class Metal101Flair
 
       if thread.should_check?
         puts "Entering thread #{thread.name}"  
-        thread.cache_comment_count!
 
         comments = get_json(thread.permalink)["children"]
         comments = flatten_comments(comments, thread)
@@ -58,6 +57,8 @@ class Metal101Flair
       else
         puts "Ignoring thread #{thread.name}"  
       end
+
+      thread.cache_comment_count!
     end
 
     # Collate data and print / PM.
