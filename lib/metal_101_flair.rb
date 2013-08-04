@@ -59,6 +59,17 @@ class Metal101Flair
 
   # Recursively consumes the comments from a thread an returns a flattened array.
   def flatten_comments(comments)
+    comms = []
+
+    comments.each do |c|
+      comms << Comment.new(c["name"], c["permalink"], c["created"], c["parent"])
+
+      if c["replies"].is_a(Hash)
+        comms = comms.concat(flatten_comments(c["replies"]["data"]["children"])
+      end
+    end
+
+    comms
   end
 
   def get_json(path="/", query={})
