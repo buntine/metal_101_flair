@@ -4,7 +4,7 @@ class RComment
 
   attr_accessor :name, :permalink, :body, :created, :parent
 
-  def initialize(name, permalink, body created, parent)
+  def initialize(name, permalink, body, created, parent)
     @name = name
     @permalink = permalink
     @body = body
@@ -15,12 +15,11 @@ class RComment
 
   # Timestamp is younger than hours.
   def should_check?(hours=6)
-    @created > hours.hours.ago
+    created > hours.hours.ago
   end
 
   def has_magic_words?
-    # Contains phrase.
-    true
+    body =~ /#{@phrases.join("|")}/
   end
 
 end
