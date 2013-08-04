@@ -1,4 +1,6 @@
-class Thread
+require "safe_yaml"
+
+class RThread
 
   attr_accessor :name, :author, :num_comments, :permalink
 
@@ -26,7 +28,7 @@ class Thread
 
   def previous_num_comments
     threads = YAML.load(File.open(@cache))
-    threads[@name]
+    threads[@name] || 0
   end
 
 end

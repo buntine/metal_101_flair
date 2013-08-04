@@ -1,6 +1,8 @@
 require "net/http"
 require "json"
-require "active_support/core_ext/hash"
+require "active_support/core_ext/object/to_query"
+require "./lib/r_thread"
+require "./lib/r_comment"
 
 # Get 100 threads, order by new
 # See if new comments exist in each
@@ -21,15 +23,16 @@ class Metal101Flair
   def initialize(limit=100, hours=6)
     @limit = limit
     @hours = hours
-    @base_url = "http://www.reddit.com/r/Metal101"
+    @base_url = "http://www.reddit.com"
   end
 
   def professors
     professors = {}
 
-    threads = get_json("new", {:limit = > @limit})["children"]
+    threads = get_json("/r/Metal101/new", {:limit => @limit})["children"]
     threads.each do |t|
-      thread = Thread.new(t["name"], t["author"], t["num_comments"], t["permalink"])
+      t = t["data"]
+      thread = RThread.new(t["name"], t["author"], t["num_comments"], t["permalink"])
 
       if thread.should_check?
         puts "Entering thread #{thread.name}"  
@@ -39,12 +42,16 @@ class Metal101Flair
         comments = flatten_comments(comments)
 
         comments.each do |c|
-          if comments.should_check? and comment.has_magic_words?
-            # Find parent comment in "comments" array.
-            # Add Author to professors hash.
-            puts " ! Found magic words in #{comment.name}"
+          if c.should_check?
+            if c.has_magic_words?
+              # Find parent comment in "comments" array.
+              # Add Author to professors hash.
+              puts " ! Found magic words in #{c.name}"
+            else
+              puts " - No magic words in #{c.name}"
+            end
           else
-            puts " - Ignoring comment #{comment.name}"
+            puts " - Ignoring old comment #{c.name}"
           end
         end
       else
@@ -62,10 +69,11 @@ class Metal101Flair
     comms = []
 
     comments.each do |c|
-      comms << Comment.new(c["name"], c["permalink"], c["created"], c["parent"])
+      c = c["data"]
+      comms << RComment.new(c["name"], c["permalink"], c["body"], c["created_utc"], c["parent"])
 
-      if c["replies"].is_a(Hash)
-        comms = comms.concat(flatten_comments(c["replies"]["data"]["children"])
+      if c["replies"].is_a?(Hash)
+        comms = comms.concat(flatten_comments(c["replies"]["data"]["children"]))
       end
     end
 
@@ -73,12 +81,17 @@ class Metal101Flair
   end
 
   def get_json(path="/", query={})
-    url = File.join(@base_url, "#{path.sub(/\/+$/, ""}.json?#{query.to_query}")
+    url = File.join(@base_url, "#{path.sub(/\/+$/, '')}.json?#{query.to_query}")
     resp = Net::HTTP.get_response(URI.parse(url))
     buffer = resp.body
 
-    JSON.parse(buffer)["data"]
+    json = JSON.parse(buffer, :max_nesting => 100)
+
+    if json.is_a?(Array)
+      json[1]["data"]
+    else
+      json["data"]
+    end
   end
 
 end
-
