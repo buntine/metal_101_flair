@@ -27,7 +27,7 @@ class Metal101Flair
   end
 
   def professors
-    professors = {}
+    professors = []
 
     threads = get_json("/r/Metal101/new", {:limit => @limit})["children"]
     threads.each do |t|
@@ -39,14 +39,15 @@ class Metal101Flair
         thread.cache_comment_count!
 
         comments = get_json(thread.permalink)["children"]
-        comments = flatten_comments(comments)
+        comments = flatten_comments(comments, thread)
 
         comments.each do |c|
           if c.should_check?
             if c.has_magic_words?
-              # Find parent comment in "comments" array.
-              # Add Author to professors hash.
               puts " ! Found magic words in #{c.name}"
+
+              p = find_comment(comments, c.parent)
+              professors << {:author => p.author, :permalink => c.permalink}
             else
               puts " - No magic words in #{c.name}"
             end
@@ -60,24 +61,37 @@ class Metal101Flair
     end
 
     # Collate data and print / PM.
+    if professors.empty?
+      puts; puts "No professors in the past #{@hours} hours..."
+    else
+      puts; puts "PROFESSORS"
+
+      puts professors.inspect
+    end
   end
 
  private
 
   # Recursively consumes the comments from a thread an returns a flattened array.
-  def flatten_comments(comments)
+  def flatten_comments(comments, thread)
     comms = []
 
     comments.each do |c|
       c = c["data"]
-      comms << RComment.new(c["name"], c["permalink"], c["body"], c["created_utc"], c["parent"])
+      comms << RComment.new(c["author"], c["name"], c["id"], c["body"], c["created_utc"], c["parent_id"], thread)
 
       if c["replies"].is_a?(Hash)
-        comms = comms.concat(flatten_comments(c["replies"]["data"]["children"]))
+        comms = comms.concat(flatten_comments(c["replies"]["data"]["children"], thread))
       end
     end
 
     comms
+  end
+
+  def find_comment(comments, name)
+    comments.find do |c|
+      c.name == name
+    end
   end
 
   def get_json(path="/", query={})
