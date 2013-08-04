@@ -1,5 +1,6 @@
 require "net/http"
 require "json"
+require "snoo"
 require "active_support/core_ext/object/to_query"
 require "./lib/r_thread"
 require "./lib/r_comment"
@@ -61,14 +62,18 @@ class Metal101Flair
       thread.cache_comment_count!
     end
 
-    # Collate data and print / PM.
-    if professors.empty?
-      puts; puts "No professors in the past #{@hours} hours..."
-    else
-      puts; puts "PROFESSORS"
+    reddit = Snoo::Client.new
+    reddit.log_in "USER_HERE", "PASSWORD_HERE"
 
-      puts professors.inspect
+    # Collate data and print / PM.
+    pm_content = if professors.empty?
+      "No professors in the past #{@hours} hours..."
+    else
+      "PROFESSORS\n\n" + format_professors(professors)
     end
+
+    reddit.send_pm "andy_panzer", "Professors for #{Time.now.strftime("%Y-%m-%d %H:%M")}", pm_content
+    reddit.log_out
   end
 
  private
@@ -107,6 +112,12 @@ class Metal101Flair
     else
       json["data"]
     end
+  end
+
+  def format_professors(professors)
+    professors.map do |p|
+      "* #{p["author"]}: #{p["permalink"]}"
+    end.join("\n")
   end
 
 end
