@@ -25,6 +25,7 @@ class Metal101Flair
     @limit = limit
     @hours = hours
     @base_url = "http://www.reddit.com"
+    @moderator = "Toeknee99"
   end
 
   def professors
@@ -72,7 +73,7 @@ class Metal101Flair
       "PROFESSORS\n\n" + format_professors(professors)
     end
 
-    reddit.send_pm "andy_panzer", "Professors for #{Time.now.strftime("%Y-%m-%d %H:%M")}", pm_content
+    reddit.send_pm @moderator, "Professors for #{Time.now.strftime("%Y-%m-%d %H:%M")}", pm_content
     reddit.log_out
   end
 
