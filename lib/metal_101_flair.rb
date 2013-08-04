@@ -99,7 +99,7 @@ class Metal101Flair
 
   def format_professors(professors)
     professors.map do |p|
-      "* #{p["author"]}: #{p["permalink"]}"
+      "* #{p[:author]}: #{p[:permalink]}"
     end.join("\n")
   end
 
